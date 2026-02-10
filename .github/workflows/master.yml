@@ -1,0 +1,27 @@
+name: Deploy Production
+
+on: 
+  push:
+    branches: [ master ]
+
+jobs:
+  deploy:
+    name: Deployment
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v1
+      - uses: actions/setup-node@master
+        with:
+          node-version: 22.7
+      - run:  yarn install && yarn build --mode production
+      - name: copy file via ssh key
+        uses: appleboy/scp-action@master
+        with:
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.USER }}
+          port: 22
+          key: ${{ secrets.PROD_SSH_PRIVATE_KEY }}
+          overwrite: true
+          source: "./dist/*"
+          target: "/home/ubuntu/mo/portfolio/site-vendas-modelo"
